@@ -8,7 +8,7 @@ class SpacerBot(discord.Client):
         print("<6> now online")
 
     async def on_message(self, msg: discord.Message):
-        if not msg.author == self.user:
+        if msg.author != self.user:
             await msg.channel.send("|" + ("▬"*15) + "|")
 
 
