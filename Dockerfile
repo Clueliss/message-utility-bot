@@ -8,4 +8,4 @@ RUN python3 -m pip install discord
 RUN curl -sSf https://raw.githubusercontent.com/Clueliss/spacer-bot/master/spacer-bot.py > /init
 RUN chmod +x /init
 
-CMD ["/init"]
+CMD ["/init", "--configpath", "/etc/spacer-bot.conf"]
