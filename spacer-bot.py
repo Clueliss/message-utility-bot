@@ -9,8 +9,9 @@ class SpacerBot(discord.Client):
     def __init__(self, config_filepath: str):
         super().__init__()
         self._config_filepath = config_filepath
-        self._prefix = ">"
+        self._prefix = "-"
         self._settings = ["prefix"]
+        self._settings_descr = [":exclamation: prefix"]
 
         try:
             self.load_prefix()
@@ -31,21 +32,20 @@ class SpacerBot(discord.Client):
         print("<6> now online")
 
     async def on_message(self, msg: discord.Message):
-        if msg.author != self.user:
-            if msg.content.startswith(self._prefix):
-                cmd: [str] = msg.content[len(self._prefix):].split(" ")
+        if not msg.author.bot and msg.content.startswith(self._prefix):
+            cmd = msg.content[len(self._prefix):].split(" ")
 
-                if len(cmd) == 0:
-                    await msg.channel.send("Invalid command")
-                else:
-                    subroutine: str = cmd[0]
-                    args: List[str] = cmd[1:]
+            if len(cmd) == 0:
+                await msg.channel.send("Invalid command")
+            else:
+                subroutine: str = cmd[0]
+                args = cmd[1:]
 
-                    if subroutine == "settings":
-                        await self.subroutine_settings(msg, args)
+                if subroutine == "settings":
+                    await self.subroutine_settings(msg, args)
 
-                    elif subroutine == "insspace":
-                        await self.subrouting_insspace(msg, args)
+                elif subroutine == "insspace":
+                    await self.subrouting_insspace(msg, args)
                         
 
 
@@ -54,29 +54,33 @@ class SpacerBot(discord.Client):
             await msg.channel.send("|" + ("▬"*15) + "|")
             await msg.delete()
         else:
-            msg.channel.send("insspace: too many args")
+            msg.channel.send(":x: Error: too many args")
 
 
     async def subroutine_settings(self, msg: discord.Message, args):
         if len(args) == 0:
-            buf = ""
-            for s in self._settings:
-                buf += "{}settings {}".format(self._prefix, s)
+            embed = discord.Embed()
 
-            await msg.channel.send(buf)
+            embed.title = "SpacerBot Settings"
+            embed.description = "Use the command format `{}settings <option>`".format(self._prefix)
+        
+            for s,d in zip(self._settings, self._settings_descr):
+                embed.add_field(name=d, value="`{}settings {}`".format(self._prefix, s), inline=True)
+
+            await msg.channel.send(embed=embed)
 
         else:
             if args[0] == "prefix":
-                if len(args)-1 == 0:
-                    await msg.channel.send("{}settings prefix <Value>".format(self._prefix))
+                if len(args) != 2:
+                    await msg.channel.send("Success :x: expected exactly 1 arg")
                 else:
                     self._prefix = args[1]
                     self.store_prefix()
 
-                    await msg.channel.send("settings prefix: success prefix is now '{}'".format(self._prefix))
+                    await msg.channel.send(":white_check_mark: Success: prefix is now '{}'".format(self._prefix))
 
             else:
-                await msg.channel.send("settings: invalid setting")
+                await msg.channel.send(":x: Error: invalid setting")
 
 
 
