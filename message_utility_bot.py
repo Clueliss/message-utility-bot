@@ -211,7 +211,7 @@ if __name__ == "__main__":
     parser.add_argument("--configpath", type=str, required=True)
     args = parser.parse_args()
 
-    TOK = os.environ["SPACER_BOT_DISCORD_TOKEN"]
+    TOK = os.environ["MESSAGE_UTILITY_BOT_DISCORD_TOKEN"]
 
     client = MessageUtilityBot(config_filepath=args.configpath)
     client.run(TOK)
