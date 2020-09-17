@@ -134,10 +134,13 @@ class MessageUtilityBot(discord.Client):
         if len(msg.attachments) == 0:
             msg.channel.send(":error: Nothing to expand")
         else:
+            GRIP_TOK = os.environ.get("MESSAGE_UTILITY_BOT_GRIP_TOKEN", "")
+
             for idx, attach in enumerate(msg.attachments):
                 content = requests.get(attach.url).text
     
                 title = args[idx] if idx < len(args) else attach.filename
+
                 
                 tmpfilepath = tempfile.mktemp() 
                 with open(tmpfilepath, "w") as tmpfile:
@@ -145,7 +148,7 @@ class MessageUtilityBot(discord.Client):
                     tmpfile.close()
 
                 html_tmp_filepath = tempfile.mktemp()
-                subprocess.call(["grip", "--title", title, "--pass", os.environ["MESSAGE_UTILITY_BOT_GRIP_TOKEN"], "--export", tmpfilepath, html_tmp_filepath])
+                subprocess.call(["grip", "--title", title, "--pass", GRIP_TOK, "--export", tmpfilepath, html_tmp_filepath])
 
                 img_tmp_filepath = tempfile.mktemp()
                 imgkit.from_file(html_tmp_filepath, img_tmp_filepath)
