@@ -136,31 +136,33 @@ class MessageUtilityBot(discord.Client):
         else:
             GRIP_TOK = os.environ.get("MESSAGE_UTILITY_BOT_GRIP_TOKEN", "")
 
-            for idx, attach in enumerate(msg.attachments):
-                content = requests.get(attach.url).text
-    
-                title = args[idx] if idx < len(args) else attach.filename
+            attach = msg.attachments[0]
+            content = requests.get(attach.url).text
+            title = attach.filename if len(args) == 0 else args.join(" ")
 
-                
-                tmpfilepath = tempfile.mktemp() 
-                with open(tmpfilepath, "w") as tmpfile:
-                    tmpfile.write(content)
-                    tmpfile.close()
+            tmpfilepath = tempfile.mktemp() 
+            with open(tmpfilepath, "w") as tmpfile:
+                tmpfile.write(content)
 
-                html_tmp_filepath = tempfile.mktemp()
-                subprocess.call(["grip", "--title", title, "--pass", GRIP_TOK, "--export", tmpfilepath, html_tmp_filepath])
+            html_tmp_filepath = tempfile.mktemp(suffix=".html")
+            subprocess.call(["grip", "--title", title, "--pass", GRIP_TOK, "--export", tmpfilepath, html_tmp_filepath])
 
-                img_tmp_filepath = tempfile.mktemp()
-                imgkit.from_file(html_tmp_filepath, img_tmp_filepath)
+            img_tmp_filepath = tempfile.mktemp(suffix=".jpg")
+            imgkit.from_file(html_tmp_filepath, img_tmp_filepath)
 
-                file = discord.File(img_tmp_filepath)
-                msg.channel.send(title, file=file)
+            file = discord.File(img_tmp_filepath)
+            await msg.channel.send(title, file=file)
+
+            os.remove(tmpfilepath)
+            os.remove(html_tmp_filepath)
+            os.remove(img_tmp_filepath)
 
 
     async def subroutine_expand(self, msg: discord.Message, args):
         if len(msg.attachments) == 0:
             msg.channel.send(":error: Nothing to expand")
         else:
+            
             for idx, attach in enumerate(msg.attachments):
                 specified_code_type = "_" if idx >= len(args) else args[idx]
 
