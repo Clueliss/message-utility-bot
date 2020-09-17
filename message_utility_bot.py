@@ -6,6 +6,8 @@ import os
 import sys
 import requests
 import tempfile
+import imgkit
+import subprocess
 from typing import *
 
 
@@ -123,8 +125,35 @@ class MessageUtilityBot(discord.Client):
 
                 elif subroutine == "expand":
                     await self.subroutine_expand(msg, args)
+
+                elif subroutine == "embedmarkdown":
+                    await self.subroutine_markdown_to_image(msg, args)
                       
-                       
+
+    async def subroutine_markdown_to_image(self, msg: discord.Message, args):
+        if len(msg.attachments) == 0:
+            msg.channel.send(":error: Nothing to expand")
+        else:
+            for idx, attach in enumerate(msg.attachments):
+                content = requests.get(attach.url)
+    
+                title = args[idx] if idx < len(args) else attach.filename
+                
+                tmpfilepath = tempfile.mktemp() 
+                with open(tmpfilepath, "w") as tmpfile:
+                    tmpfile.write(content)
+                    tmpfile.close()
+
+                html_tmp_filepath = tempfile.mktemp()
+                subprocess.call(["grip", "--title", title, "--pass", os.environ["MESSAGE_UTILITY_BOT_GRIP_TOKEN"], "--export", tmpfilepath, html_tmp_filepath])
+
+                img_tmp_filepath = tempfile.mktemp()
+                imgkit.from_file(html_tmp_filepath, img_tmp_filepath)
+
+                file = discord.File(img_tmp_filepath)
+                msg.channel.send(title, file=file)
+
+
     async def subroutine_expand(self, msg: discord.Message, args):
         if len(msg.attachments) == 0:
             msg.channel.send(":error: Nothing to expand")
@@ -183,7 +212,7 @@ class MessageUtilityBot(discord.Client):
         if len(args) == 0:
             embed = discord.Embed()
 
-            embed.title = "SpacerBot Settings"
+            embed.title = "MessageUtilityBot Settings"
             embed.description = "Use the command format `{}settings <option>`".format(self._prefix)
         
             for s,d in zip(self._settings, self._settings_descr):
