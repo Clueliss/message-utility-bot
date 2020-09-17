@@ -138,7 +138,7 @@ class MessageUtilityBot(discord.Client):
 
             attach = msg.attachments[0]
             content = requests.get(attach.url).text
-            title = attach.filename if len(args) == 0 else args.join(" ")
+            title = attach.filename if len(args) == 0 else " ".join(args)
 
             tmpfilepath = tempfile.mktemp() 
             with open(tmpfilepath, "w") as tmpfile:
@@ -152,6 +152,7 @@ class MessageUtilityBot(discord.Client):
 
             file = discord.File(img_tmp_filepath)
             await msg.channel.send(title, file=file)
+            await msg.delete()
 
             os.remove(tmpfilepath)
             os.remove(html_tmp_filepath)
