@@ -135,7 +135,7 @@ class MessageUtilityBot(discord.Client):
             msg.channel.send(":error: Nothing to expand")
         else:
             for idx, attach in enumerate(msg.attachments):
-                content = requests.get(attach.url)
+                content = requests.get(attach.url).text
     
                 title = args[idx] if idx < len(args) else attach.filename
                 
