@@ -1,0 +1,9 @@
+version: "3"
+services:
+    message_utility_bot:
+        build: .
+
+        environment:
+            - QT_QPA_PLATFORM=offscreen
+            - MESSAGE_UTILITY_BOT_DISCORD_TOKEN=
+            - MESSAGE_UTILITY_BOT_GRIP_TOKEN=
